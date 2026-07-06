@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="color-scheme" content="dark"/>
+<meta name="theme-color" content="#050505"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Исходящий поток для СТАЛЬВИЖН — ТруРОП</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#050505;
+  --card:rgba(255,255,255,.035);
+  --card2:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.07);
+  --border2:rgba(255,255,255,.14);
+  --blue:#0066ff;
+  --cyan:#00c3ff;
+  --green:#00ff95;
+  --red:#ff4d4d;
+  --grad:linear-gradient(135deg,#0066ff,#00c3ff);
+  --grad2:linear-gradient(135deg,#00c3ff,#00ff95);
+  --white:#fff;
+  --gray:#aaa;
+  --lgray:#666;
+  --text:#d4d4d4;
+}
+html{scroll-behavior:smooth;background:#050505;color-scheme:dark;}
+body{font-family:'Inter',sans-serif;background:#050505 !important;color:#fff !important;overflow-x:hidden;}
+
+.bg-glow{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 55% 45% at 10% 15%,rgba(0,102,255,.13),transparent),
+    radial-gradient(ellipse 45% 55% at 90% 85%,rgba(0,195,255,.08),transparent),
+    radial-gradient(ellipse 35% 35% at 60% 40%,rgba(0,255,149,.04),transparent);
+}
+
+.slide{
+  position:relative;z-index:2;
+  background:#050505;
+  min-height:100svh;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:72px 22px 64px;
+  max-width:560px;margin:0 auto;
+  border-bottom:1px solid var(--border);
+}
+.slide:last-child{border-bottom:none;}
+
+.s-num{
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--lgray);margin-bottom:14px;
+  display:flex;align-items:center;gap:10px;
+}
+.s-num::after{content:'';height:1px;flex:1;background:var(--border);}
+.s-title{font-size:30px;font-weight:900;line-height:1.08;letter-spacing:-.025em;margin-bottom:14px;}
+.s-sub{font-size:15px;color:var(--gray);line-height:1.6;margin-bottom:26px;}
+.grad-text{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.grad2-text{background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease;}
+.reveal.on{opacity:1;transform:none;}
+
+/* карточки-списки */
+.list{display:flex;flex-direction:column;gap:9px;}
+.li{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:13px;padding:14px 16px;
+  font-size:14px;color:var(--text);line-height:1.5;
+  display:flex;align-items:flex-start;gap:10px;
+}
+.li::before{content:"→";color:var(--cyan);font-weight:700;flex-shrink:0;}
+.li strong{color:#fff;}
+.li.warn::before{content:"!";color:#ff6b6b;}
+.li.warn{background:rgba(255,77,77,.05);border-color:rgba(255,77,77,.15);}
+
+/* большие цифры */
+.big-num{
+  font-size:clamp(44px,13vw,64px);font-weight:900;line-height:1;letter-spacing:-.03em;
+  background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-bottom:6px;
+}
+.big-num.g2{background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.big-l{font-size:13px;color:var(--lgray);line-height:1.5;}
+
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px;}
+.stat{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:16px 15px;
+}
+.stat-n{font-size:23px;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap;}
+.stat-n.g2{background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.stat-l{font-size:12px;color:var(--lgray);margin-top:4px;line-height:1.4;}
+.stat.wide{grid-column:1/3;}
+
+/* месяцы */
+.month{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:20px;margin-bottom:10px;
+}
+.month.m2{background:rgba(0,102,255,.06);border-color:rgba(0,102,255,.25);}
+.month-tag{
+  display:inline-block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--cyan);background:rgba(0,195,255,.08);border:1px solid rgba(0,195,255,.2);
+  padding:4px 11px;border-radius:100px;margin-bottom:12px;font-weight:700;
+}
+.month-t{font-size:19px;font-weight:800;line-height:1.25;margin-bottom:10px;}
+.month-d{font-size:13px;color:var(--gray);line-height:1.6;}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;}
+.tag{
+  font-size:12px;color:var(--text);
+  background:rgba(255,255,255,.05);border:1px solid var(--border2);
+  padding:6px 12px;border-radius:100px;
+}
+
+/* вариант-карточка */
+.opt-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+.opt-tag{
+  display:inline-block;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+  padding:5px 12px;border-radius:100px;font-weight:700;
+}
+.opt-tag.b{color:var(--cyan);background:rgba(0,195,255,.08);border:1px solid rgba(0,195,255,.2);}
+.opt-tag.n{color:var(--gray);background:rgba(255,255,255,.05);border:1px solid var(--border2);}
+
+/* экономика */
+.cost-rows{display:flex;flex-direction:column;margin-bottom:18px;}
+.cost-row{
+  display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+  padding:13px 0;border-bottom:1px solid var(--border);
+}
+.cost-row:last-child{border-bottom:none;}
+.cost-name{font-size:14px;color:var(--text);line-height:1.4;}
+.cost-val{font-size:15px;font-weight:800;color:#fff;white-space:nowrap;}
+.total-box{
+  background:rgba(0,102,255,.08);border:1px solid rgba(0,102,255,.25);
+  border-radius:16px;padding:20px;text-align:center;
+}
+.total-l{font-size:12px;color:var(--lgray);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;}
+.total-n{font-size:clamp(26px,8vw,34px);font-weight:900;letter-spacing:-.02em;
+  background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.total-s{font-size:12px;color:var(--lgray);margin-top:5px;}
+
+/* ROI слайд */
+.roi-flow{display:flex;flex-direction:column;gap:0;align-items:stretch;margin-bottom:20px;}
+.roi-step{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:16px 18px;
+  display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+}
+.roi-arr{text-align:center;color:var(--cyan);font-size:16px;padding:5px 0;}
+.roi-l{font-size:13px;color:var(--gray);line-height:1.4;}
+.roi-n{font-size:19px;font-weight:900;color:#fff;white-space:nowrap;}
+.roi-final{
+  background:rgba(0,255,149,.06);border:1px solid rgba(0,255,149,.2);
+  border-radius:16px;padding:22px;text-align:center;
+}
+.roi-final-n{font-size:clamp(32px,10vw,44px);font-weight:900;letter-spacing:-.03em;
+  background:var(--grad2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
+.roi-final-l{font-size:13px;color:var(--text);line-height:1.55;}
+.roi-final-l strong{color:#fff;}
+
+/* hero */
+.hero-eye{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--lgray);margin-bottom:18px;}
+.hero-h1{font-size:clamp(34px,10vw,46px);font-weight:900;line-height:1.02;letter-spacing:-.035em;margin-bottom:18px;}
+.hero-h1 .hl{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block;}
+.hero-sub{font-size:16px;color:var(--gray);line-height:1.65;margin-bottom:26px;}
+.hero-for{
+  font-size:13px;color:var(--lgray);
+  padding-left:13px;border-left:2px solid rgba(0,195,255,.4);
+  line-height:1.6;
+}
+.logo{font-size:17px;font-weight:900;margin-bottom:40px;}
+.logo span{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.scroll-hint{
+  margin-top:44px;font-size:12px;color:var(--lgray);
+  display:flex;align-items:center;gap:8px;
+}
+.dot-g{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:#00ff95;box-shadow:0 0 10px rgba(0,255,149,.7);}
+
+/* риск-плашка */
+.risk{
+  background:rgba(255,77,77,.05);border:1px solid rgba(255,77,77,.15);
+  border-radius:14px;padding:15px 17px;margin-top:14px;
+  font-size:13px;color:var(--text);line-height:1.55;
+}
+.risk strong{color:#ff6b6b;font-size:11px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:5px;}
+
+/* финальный футер */
+.foot{
+  margin-top:36px;padding-top:22px;border-top:1px solid var(--border);
+  font-size:13px;color:var(--lgray);line-height:1.8;
+}
+.foot a{color:var(--cyan);text-decoration:none;}
+
+@media(min-width:600px){
+  .slide{padding:88px 32px 72px;}
+  .s-title{font-size:36px;}
+}
+@media(prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none;transition:none;}
+}
+</style>
+</head>
+<body>
+<div class="bg-glow"></div>
+
+<!-- СЛАЙД 1 -->
+<section class="slide">
+  <div class="reveal">
+    <div class="logo">Тру<span>РОП</span></div>
+    <div class="hero-eye">Предложение для СТАЛЬВИЖН</div>
+    <h1 class="hero-h1">Исходящий поток<span class="hl">для СТАЛЬВИЖН</span></h1>
+    <p class="hero-sub">Управляемый тест канала поиска клиентов. Не просто обзвон — тест с понятными метриками, контролем и возможностью быстро масштабировать или остановить.</p>
+    <div class="hero-for">Заранее известно, что считаем, как контролируем и в какой момент принимаем решение — продолжать, менять или останавливать.</div>
+    <div class="scroll-hint"><span class="dot-g"></span>Листайте вниз — 9 экранов, 3 минуты</div>
+  </div>
+</section>
+
+<!-- СЛАЙД 2 -->
+<section class="slide">
+  <div class="reveal">
+    <div class="s-num">02 · Почему этот канал</div>
+    <h2 class="s-title">Плюс исходящего потока — <span class="grad-text">управляемость</span></h2>
+    <p class="s-sub">Канал можно считать и быстро корректировать. Мы заранее знаем:</p>
+    <div class="list">
+      <div class="li">сколько <strong>звонков</strong> должно быть;</div>
+      <div class="li">сколько <strong>диалогов</strong> нужно получить;</div>
+      <div class="li">какой <strong>этап воронки</strong> считаем результатом;</div>
+      <div class="li">где менять <strong>сегмент, скрипт или оффер</strong>.</div>
+    </div>
+  </div>
+</section>
+
+<!-- СЛАЙД 3 -->
+<section class="slide">
+  <div class="reveal">
+    <div class="s-num">03 · Как запускаем</div>
+    <h2 class="s-title">Старт — со <span class="grad-text">стратегической сессии</span></h2>
+    <p class="s-sub">Перед запуском фиксируем все параметры теста:</p>
+    <div class="tags" style="margin-top:0;">
+      <span class="tag">Сегменты</span>
+      <span class="tag">География</span>
+      <span class="tag">ЛПР</span>
+      <span class="tag">Оффер</span>
+      <span class="tag">Ключевой этап воронки</span>
+      <span class="tag">Правила фиксации в CRM</span>
+      <span class="tag">Объём лидов под мощность отдела продаж</span>
+    </div>
+  </div>
+</section>
+
+<!-- СЛАЙД 4 -->
+<section class="slide">
+  <div class="reveal">
+    <div class="s-num">04 · Цели по месяцам</div>
+    <h2 class="s-title">Месяц 1 — проверка воронки.<br/><span class="grad2-text">Месяц 2 — первая сделка</span></h2>
+    <div class="month">
+      <div class="month-tag">Месяц 1</div>
+      <div class="month-t">Выход на ключевой этап воронки</div>
+      <div class="month-d">Это может быть:</div>
+      <div class="tags">
+        <span class="tag">переданный ЛПР</span>
+        <span class="tag">запрос КП</span>
+        <span class="tag">встреча</span>
+        <span class="tag">заявка на расчёт</span>
+      </div>
+    </div>
+    <div class="month m2">
+      <div class="month-tag">Месяц 2</div>
+      <div class="month-t">Первая сделка из исходящего канала</div>
+    </div>
+  </div>
+</section>
+
+<!-- СЛАЙД 5 -->
+<section class="slide">
+  <div class="reveal">
+    <div class="s-num">05 · Вариант 1</div>
+    <div class="opt-head">
+      <h2 class="s-title" style="margin-bottom:0;">Собственный сотрудник</h2>
+      <span class="opt-tag b">Рекомендуем</span>
+    </div>
+    <p class="s-sub">Качественная управляемая проработка каждого контакта.</p>
+    <div class="big-num">100</div>
+    <div class="big-l" style="margin-bottom:22px;">качественных диалогов в неделю</div>
+    <div class="list">
+      <div class="li">2-недельный тест перед выходом на полный объём;</div>
+      <div class="li">ежедневный контроль: звонки, CRM, записи, корректировки;</div>
+      <div class="li">сотрудника можно развивать внутри компании.</div>
+    </div>
+  </div>
+</section>
+
+<!-- СЛАЙД 6 -->
+<section class="slide">
+  <div class="reveal">
+    <div class="s-num">06 · Экономика варианта 1</div>
+    <h2 class="s-title">Стартовый бюджет — <span class="grad-text">понятный и ограниченный</span></h2>
+    <div class="cost-rows">
+      <div class="cost-row"><span class="cost-name">База контактов</span><span class="cost-val">≈ 10 000 ₽</span></div>
+      <div class="cost-row"><span class="cost-name">Телефония</span><span class="cost-val">≈ 4 000 ₽/мес</span></div>
+      <div class="cost-row"><span class="cost-name">Размещение вакансии</span><span class="cost-val">от 10 000 ₽</span></div>
+      <div class="cost-row"><span class="cost-name">Подбор сотрудника</span><span class="cost-val">80 000 ₽</span></div>
+    </div>
+    <div class="total-box">
+      <div class="total-l">Ориентир первого месяца</div>
+      <div class="total-n">140–160 тыс. ₽</div>
+      <div class="total-s">+ KPI сотрудника</div>
+    </div>
+  </div>
+</section>
+
+<!-- СЛАЙД 7 -->
+<section class="slide">
+  <div class="reveal">
+    <div class="s-num">07 · Вариант 2</div>
+    <div class="opt-head">
+      <h2 class="s-title" style="margin-bottom:0;">Телемаркетинг</h2>
+      <span class="opt-tag n">Альтернатива</span>
+    </div>
+    <p class="s-sub">Быстрее и объёмнее, но менее глубоко.</p>
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-n">≈ 80 000 ₽</div><div class="stat-l">за 3 000 контактов</div></div>
+      <div class="stat"><div class="stat-n g2">Быстрый</div><div class="stat-l">запуск и большой объём прозвона</div></div>
+      <div class="stat wide"><div class="stat-l" style="margin-top:0;font-size:13px;color:var(--text);">База, скрипты, телефония и отчётность могут входить в услугу</div></div>
+    </div>
+    <div class="risk">
+      <strong>Риск</strong>
+      Ниже качество проработки и сложнее тестировать гипотезы.
+    </div>
+  </div>
+</section>
+
+<!-- СЛАЙД 8 -->
+<section class="slide">
+  <div class="reveal">
+    <div class="s-num">08 · Рекомендация</div>
+    <h2 class="s-title">Почему начать со <span class="grad-text">своего человека</span></h2>
+    <p class="s-sub">Для сложного B2B важнее качество гипотезы, чем объём.</p>
+    <div class="list">
+      <div class="li">сложный <strong>B2B-продукт</strong>;</div>
+      <div class="li">средний чек — <strong>около 3 млн ₽</strong>;</div>
+      <div class="li">важна качественная коммуникация с ЛПР;</div>
+      <div class="li">можно быстро менять гипотезы;</div>
+      <div class="li">канал остаётся <strong>внутри компании</strong>.</div>
+    </div>
+  </div>
+</section>
+
+<!-- СЛАЙД 9 -->
+<section class="slide">
+  <div class="reveal">
+    <div class="s-num">09 · Экономическое обоснование</div>
+    <h2 class="s-title">Одна сделка <span class="grad2-text">окупает тест</span></h2>
+    <div class="roi-flow">
+      <div class="roi-step"><span class="roi-l">Средняя сделка</span><span class="roi-n">≈ 3 000 000 ₽</span></div>
+      <div class="roi-arr">↓</div>
+      <div class="roi-step"><span class="roi-l">Маржинальность</span><span class="roi-n">≈ 30%</span></div>
+      <div class="roi-arr">↓</div>
+    </div>
+    <div class="roi-final">
+      <div class="roi-final-n">900 000 ₽</div>
+      <div class="roi-final-l">ориентировочная маржа с одной сделки.<br/><strong>Если во втором месяце канал даёт хотя бы одну сделку — тест экономически оправдан.</strong></div>
+    </div>
+    <div class="foot">
+      <strong style="color:#fff;">Тру</strong><span class="grad-text" style="font-weight:900;">РОП</span> · Максим Рудницкий<br/>
+      <a href="https://truerop.ru">truerop.ru</a> · <a href="https://t.me/ma_rud">Telegram: @ma_rud</a>
+    </div>
+  </div>
+</section>
+
+<script>
+const obs = new IntersectionObserver(es => es.forEach(e => {
+  if(e.isIntersecting){e.target.classList.add('on');obs.unobserve(e.target);}
+}),{threshold:.07,rootMargin:'0px 0px -28px 0px'});
+document.querySelectorAll('.reveal').forEach(r=>obs.observe(r));
+</script>
+</body>
+</html>
